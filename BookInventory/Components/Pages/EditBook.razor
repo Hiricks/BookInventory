@@ -1,0 +1,47 @@
+﻿@page "/editbook/{Id:int}"
+@using BookInventory.Models
+@inject Shared.Services.BookService BookService
+@inject NavigationManager NavigationManager
+
+<h3>EditBook</h3>
+
+<EditForm Model="book" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="book.Title" />
+    </div>
+    <div class="form-group">
+        <label for="author">Author</label>
+        <InputText id="author" class="form-control" @bind-Value="book.Author" />
+    </div>
+    <div class="form-group">
+        <label for="genre">Genre</label>
+        <InputText id="genre" class="form-control" @bind-Value="book.Genre" />
+    </div>
+    <div class="form-group">
+        <label for="year">Year</label>
+        <InputNumber id="year" class="form-control" @bind-Value="book.Year" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Book? book;
+
+    protected override void OnInitialized()
+    {
+        book = BookService.GetBook(Id);
+    }
+
+    private void HandleValidSubmit()
+    {
+        BookService.UpdateBook(book);
+        NavigationManager.NavigateTo("/books");
+    }
+}
