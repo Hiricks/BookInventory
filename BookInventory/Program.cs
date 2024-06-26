@@ -8,7 +8,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Registering BookService as a singleton service
-services.AddSingleton<BookService>();
+builder.Services.AddSingleton<BookService>();
 
 var app = builder.Build();
 
