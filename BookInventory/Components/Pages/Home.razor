@@ -1,5 +1,70 @@
 ﻿@page "/"
+@using BookInventory.Models
+@inject BookInventory.Shared.Services.BookService BookService
 
-<PageTitle>Booklist</PageTitle>
+<PageTitle>Henry's Book Inventory</PageTitle>
 
-<h1>Hello, Welcome to Henry's Book Inventory</h1>
+<div class="container">
+    <h1 class="text-center my-4">Welcome to Henry's Book Inventory</h1>
+
+    <p class="lead text-center mb-5">Explore our collection of science fiction classics and modern masterpieces.</p>
+
+    <div class="row">
+        @foreach (var book in featuredBooks)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100" style="max-width: 300px; margin: auto;">
+                    <img src="@book.CoverImage" class="card-img-top" alt="@book.Title cover" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">@book.Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
+                        <p class="card-text small">@book.Summary</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/books" class="btn btn-primary btn-lg">View All Books</a>
+    </div>
+</div>
+
+@code {
+    // private class Book
+    // {
+    //     public string Title { get; set; }
+    //     public string Author { get; set; }
+    //     public string CoverImage { get; set; }
+    //     public string Summary { get; set; }
+    // }
+
+    private List<Book> featuredBooks = new List<Book>
+    {
+        new Book {
+            Title = "Dune",
+            Author = "Frank Herbert",
+            CoverImage = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1555447414i/44767458.jpg",
+            Summary = "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the 'spice' melange, a drug capable of extending life and enhancing consciousness."
+        },
+        new Book {
+            Title = "Neuromancer",
+            Author = "William Gibson",
+            CoverImage = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1554437249i/6088007.jpg",
+            Summary = "Case was the sharpest data-thief in the matrix—until he crossed the wrong people and they crippled his nervous system. Now a mysterious new employer has recruited him for a last-chance run at an unthinkably powerful artificial intelligence."
+        },
+        new Book {
+            Title = "The Hitchhiker's Guide to the Galaxy",
+            Author = "Douglas Adams",
+            CoverImage = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1559986152i/386162.jpg",
+            Summary = "Seconds before Earth is demolished to make way for a galactic freeway, Arthur Dent is plucked off the planet by his friend Ford Prefect, a researcher for the revised edition of The Hitchhiker's Guide to the Galaxy who, for the last fifteen years, has been posing as an out-of-work actor."
+        }
+    };
+
+    protected override void OnInitialized()
+    {
+        // You can uncomment and modify this section if you want to use actual books from your BookService
+        // var allBooks = BookService.GetBooks().ToList();
+        // featuredBooks = allBooks.Take(3).ToList();
+    }
+}

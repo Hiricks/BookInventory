@@ -1,34 +1,95 @@
 ﻿@page "/books"
-@inject Shared.Services.BookService BookService
+@inject BookInventory.Shared.Services.BookService BookService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <h3>Book List</h3>
 
-<div class="row">
-    @foreach (var book in BookService.GetBooks())
-    {
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <img src="@book.CoverImage" class="card-img-top" alt="@book.Title cover">
-                <div class="card-body">
-                    <h5 class="card-title">@book.Title</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
-                    <p class="card-text">@book.Summary</p>
-                    <p class="card-text"><small class="text-muted">Genre: @book.Genre | Year: @book.Year</small></p>
-                    <button class="btn btn-primary" @onclick="() => EditBook(book.Id)">Edit</button>
-                    <button class="btn btn-danger" @onclick="() => DeleteBook(book.Id)">Delete</button>
+@if (books == null)
+{
+    <p>Loading...</p>
+}
+else if (!books.Any())
+{
+    <p>No books available. Add some books to get started!</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var book in books)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="@book.CoverImage" class="card-img-top" alt="@book.Title cover">
+                    <div class="card-body">
+                        <h5 class="card-title">@book.Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
+                        <p class="card-text">@book.Summary</p>
+                        <p class="card-text"><small class="text-muted">Genre: @book.Genre | Year: @book.Year</small></p>
+                        <button class="btn btn-primary" @onclick="() => EditBook(book.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteBook(book.Id)">Delete</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}
 
-<button class="btn btn-success" @onclick="AddBook">Add Book</button>
+<button class="btn btn-success" @onclick="AddBookAsync">Add Book</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">
+        @errorMessage
+    </div>
+}
 
 @code {
-    private void AddBook()
+    private List<BookInventory.Models.Book> books;
+    private string errorMessage = string.Empty;
+    private bool isFirstRender = true;
+
+    protected override async Task OnInitializedAsync()
     {
-        NavigationManager.NavigateTo("/addbook");
+        await LoadBooks();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isFirstRender = false;
+        }
+    }
+
+    private async Task LoadBooks()
+    {
+        try
+        {
+            books = (await BookService.GetBooksAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading books: {ex.Message}";
+            await LogErrorToConsole(errorMessage);
+            NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
+        }
+    }
+
+    private async Task AddBookAsync()
+    {
+        try
+        {
+            await Task.CompletedTask; // Simulate async operation
+
+            NavigationManager.NavigateTo("/addbook");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error navigating to add book page: {ex.Message}";
+            await LogErrorToConsole(errorMessage);
+            NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
+        }
     }
 
     private void EditBook(int id)
@@ -36,8 +97,51 @@
         NavigationManager.NavigateTo($"/editbook/{id}");
     }
 
-    private void DeleteBook(int id)
+    private async Task DeleteBook(int id)
     {
-        BookService.DeleteBook(id);
+        try
+        {
+            await BookService.DeleteBookAsync(id);
+            await LogMessageToConsole($"Book with id {id} deleted successfully");
+            await LoadBooks(); // Reload the book list after deletion
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting book: {ex.Message}";
+            await LogErrorToConsole(errorMessage);
+            NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
+        }
+    }
+
+    private async Task LogMessageToConsole(string message)
+    {
+        try
+        {
+            if (!isFirstRender)
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", message);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error logging message to console: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task LogErrorToConsole(string errorMessage)
+    {
+        try
+        {
+            if (!isFirstRender)
+            {
+                await JSRuntime.InvokeVoidAsync("console.error", errorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error logging error to console: {ex.Message}";
+            StateHasChanged();
+        }
     }
 }

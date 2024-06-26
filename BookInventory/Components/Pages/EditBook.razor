@@ -2,54 +2,101 @@
 @using BookInventory.Models
 @inject Shared.Services.BookService BookService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
-<h3>EditBook</h3>
+<h3>Edit Book</h3>
 
-<EditForm Model="book" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@if (book == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="book" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="form-group">
-        <label for="title">Title</label>
-        <InputText id="title" class="form-control" @bind-Value="book.Title" />
+        <div class="form-group">
+            <label for="title">Title</label>
+            <InputText id="title" class="form-control" @bind-Value="book.Title" />
+        </div>
+        <div class="form-group">
+            <label for="author">Author</label>
+            <InputText id="author" class="form-control" @bind-Value="book.Author" />
+        </div>
+        <div class="form-group">
+            <label for="genre">Genre</label>
+            <InputText id="genre" class="form-control" @bind-Value="book.Genre" />
+        </div>
+        <div class="form-group">
+            <label for="year">Year</label>
+            <InputNumber id="year" class="form-control" @bind-Value="book.Year" />
+        </div>
+        <div class="form-group">
+            <label for="coverImage">Cover Image URL</label>
+            <InputText id="coverImage" class="form-control" @bind-Value="book.CoverImage" />
+        </div>
+        <div class="form-group">
+            <label for="summary">Summary</label>
+            <InputTextArea id="summary" class="form-control" @bind-Value="book.Summary" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+    </EditForm>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">
+        @errorMessage
     </div>
-    <div class="form-group">
-        <label for="author">Author</label>
-        <InputText id="author" class="form-control" @bind-Value="book.Author" />
-    </div>
-    <div class="form-group">
-        <label for="genre">Genre</label>
-        <InputText id="genre" class="form-control" @bind-Value="book.Genre" />
-    </div>
-    <div class="form-group">
-        <label for="year">Year</label>
-        <InputNumber id="year" class="form-control" @bind-Value="book.Year" />
-    </div>
-    <div class="form-group">
-        <label for="coverImage">Cover Image URL</label>
-        <InputText id="coverImage" class="form-control" @bind-Value="book.CoverImage" />
-    </div>
-    <div class="form-group">
-        <label for="summary">Summary</label>
-        <InputTextArea id="summary" class="form-control" @bind-Value="book.Summary" />
-    </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-</EditForm>
+}
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
     private Book? book;
+    private string errorMessage = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        book = BookService.GetBook(Id);
+        await LoadBook();
     }
 
-    private void HandleValidSubmit()
+    private async Task LoadBook()
     {
-        BookService.UpdateBook(book);
+        try
+        {
+            book = await BookService.GetBookAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading book: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("console.error", errorMessage);
+            NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await BookService.UpdateBookAsync(book);
+            await JSRuntime.InvokeVoidAsync("console.log", $"Book with id {Id} updated successfully");
+            NavigationManager.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating book: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("console.error", errorMessage);
+            NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
+        }
+    }
+
+    private void CancelEdit()
+    {
         NavigationManager.NavigateTo("/books");
     }
 }

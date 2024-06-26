@@ -2,9 +2,9 @@
 @using BookInventory.Models
 @inject Shared.Services.BookService BookService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
-
-<h3>AddBook</h3>
+<h3>Add Book</h3>
 
 <EditForm Model="book" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
@@ -34,15 +34,40 @@
         <label for="summary">Summary</label>
         <InputTextArea id="summary" class="form-control" @bind-Value="book.Summary" />
     </div>
+
     <button type="submit" class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-secondary" @onclick="CancelAdd">Cancel</button>
 </EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">
+        @errorMessage
+    </div>
+}
 
 @code {
     private Book book = new Book();
+    private string errorMessage = string.Empty;
 
-    private void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
-        BookService.AddBook(book);
+        try
+        {
+            await BookService.AddBookAsync(book);
+            await JSRuntime.InvokeVoidAsync("console.log", "Book added successfully");
+            NavigationManager.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error adding book: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("console.error", errorMessage);
+            NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
+        }
+    }
+
+    private void CancelAdd()
+    {
         NavigationManager.NavigateTo("/books");
     }
 }
