@@ -2,34 +2,26 @@
 @inject Shared.Services.BookService BookService
 @inject NavigationManager NavigationManager
 
-<h3>BookList</h3>
+<h3>Book List</h3>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Genre</th>
-            <th>Year</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var book in BookService.GetBooks())
-        {
-            <tr>
-                <td>@book.Title</td>
-                <td>@book.Author</td>
-                <td>@book.Genre</td>
-                <td>@book.Year</td>
-                <td>
+<div class="row">
+    @foreach (var book in BookService.GetBooks())
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="@book.CoverImage" class="card-img-top" alt="@book.Title cover">
+                <div class="card-body">
+                    <h5 class="card-title">@book.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
+                    <p class="card-text">@book.Summary</p>
+                    <p class="card-text"><small class="text-muted">Genre: @book.Genre | Year: @book.Year</small></p>
                     <button class="btn btn-primary" @onclick="() => EditBook(book.Id)">Edit</button>
                     <button class="btn btn-danger" @onclick="() => DeleteBook(book.Id)">Delete</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 <button class="btn btn-success" @onclick="AddBook">Add Book</button>
 

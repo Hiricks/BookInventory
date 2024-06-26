@@ -34,6 +34,8 @@ namespace BookInventory.Shared.Services
                 existingBook.Author = book.Author;
                 existingBook.Genre = book.Genre;
                 existingBook.Year = book.Year;
+                existingBook.CoverImage = book.CoverImage;
+                existingBook.Summary = book.Summary;
             }
         }
         public void DeleteBook(int id)

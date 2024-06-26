@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<BookService>();
 
 var app = builder.Build();
-
+        
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

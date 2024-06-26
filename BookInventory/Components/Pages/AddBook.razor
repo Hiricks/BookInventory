@@ -26,6 +26,14 @@
         <label for="year">Year</label>
         <InputNumber id="year" class="form-control" @bind-Value="book.Year" />
     </div>
+    <div class="form-group">
+        <label for="coverImage">Cover Image URL</label>
+        <InputText id="coverImage" class="form-control" @bind-Value="book.CoverImage" />
+    </div>
+    <div class="form-group">
+        <label for="summary">Summary</label>
+        <InputTextArea id="summary" class="form-control" @bind-Value="book.Summary" />
+    </div>
     <button type="submit" class="btn btn-primary">Save</button>
 </EditForm>
 

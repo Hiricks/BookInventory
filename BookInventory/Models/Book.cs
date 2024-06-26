@@ -8,5 +8,6 @@
         public string? Genre { get; set; }
         public int Year { get; set; }
         public string? CoverImage { get; set; }
+        public string? Summary { get; set; }
     }
 }
