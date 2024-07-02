@@ -19,6 +19,8 @@ builder.Services.AddScoped<BookService>();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+// Optionally add more logging providers
+builder.Logging.AddEventSourceLogger();
 
 var app = builder.Build();
 

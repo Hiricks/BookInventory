@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using BookInventory.Models
 @inject BookInventory.Shared.Services.BookService BookService
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Henry's Book Inventory</PageTitle>
 
@@ -31,14 +32,6 @@
 </div>
 
 @code {
-    // private class Book
-    // {
-    //     public string Title { get; set; }
-    //     public string Author { get; set; }
-    //     public string CoverImage { get; set; }
-    //     public string Summary { get; set; }
-    // }
-
     private List<Book> featuredBooks = new List<Book>
     {
         new Book {
@@ -63,8 +56,16 @@
 
     protected override void OnInitialized()
     {
-        // You can uncomment and modify this section if you want to use actual books from your BookService
+        // If you want to use actual books from your BookService, uncomment and modify this section
         // var allBooks = BookService.GetBooks().ToList();
         // featuredBooks = allBooks.Take(3).ToList();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Perform any JS interop initialization here if necessary
+        }
     }
 }

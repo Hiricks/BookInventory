@@ -9,6 +9,7 @@
 {
     <p>Loading...</p>
 }
+
 else if (!books.Any())
 {
     <p>No books available. Add some books to get started!</p>
@@ -27,7 +28,7 @@ else
                         <p class="card-text">@book.Summary</p>
                         <p class="card-text"><small class="text-muted">Genre: @book.Genre | Year: @book.Year</small></p>
                         <button class="btn btn-primary" @onclick="() => EditBook(book.Id)">Edit</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteBook(book.Id)">Delete</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteBookAsync(book.Id)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -47,22 +48,13 @@ else
 @code {
     private List<BookInventory.Models.Book> books;
     private string errorMessage = string.Empty;
-    private bool isFirstRender = true;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadBooks();
+        await LoadBooksAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            isFirstRender = false;
-        }
-    }
-
-    private async Task LoadBooks()
+    private async Task LoadBooksAsync()
     {
         try
         {
@@ -71,7 +63,7 @@ else
         catch (Exception ex)
         {
             errorMessage = $"Error loading books: {ex.Message}";
-            await LogErrorToConsole(errorMessage);
+            await LogErrorToConsoleAsync(errorMessage);
             NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
         }
     }
@@ -80,14 +72,12 @@ else
     {
         try
         {
-            await Task.CompletedTask; // Simulate async operation
-
             NavigationManager.NavigateTo("/addbook");
         }
         catch (Exception ex)
         {
             errorMessage = $"Error navigating to add book page: {ex.Message}";
-            await LogErrorToConsole(errorMessage);
+            await LogErrorToConsoleAsync(errorMessage);
             NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
         }
     }
@@ -97,30 +87,27 @@ else
         NavigationManager.NavigateTo($"/editbook/{id}");
     }
 
-    private async Task DeleteBook(int id)
+    private async Task DeleteBookAsync(int id)
     {
         try
         {
             await BookService.DeleteBookAsync(id);
-            await LogMessageToConsole($"Book with id {id} deleted successfully");
-            await LoadBooks(); // Reload the book list after deletion
+            await LogMessageToConsoleAsync($"Book with id {id} deleted successfully");
+            await LoadBooksAsync(); // Reload the book list after deletion
         }
         catch (Exception ex)
         {
             errorMessage = $"Error deleting book: {ex.Message}";
-            await LogErrorToConsole(errorMessage);
+            await LogErrorToConsoleAsync(errorMessage);
             NavigationManager.NavigateTo($"/Error?ExceptionMessage={Uri.EscapeDataString(ex.Message)}");
         }
     }
 
-    private async Task LogMessageToConsole(string message)
+    private async Task LogMessageToConsoleAsync(string message)
     {
         try
         {
-            if (!isFirstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", message);
-            }
+            await JSRuntime.InvokeVoidAsync("console.log", message);
         }
         catch (Exception ex)
         {
@@ -129,14 +116,11 @@ else
         }
     }
 
-    private async Task LogErrorToConsole(string errorMessage)
+    private async Task LogErrorToConsoleAsync(string errorMessage)
     {
         try
         {
-            if (!isFirstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("console.error", errorMessage);
-            }
+            await JSRuntime.InvokeVoidAsync("console.error", errorMessage);
         }
         catch (Exception ex)
         {
